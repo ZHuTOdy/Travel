@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>收藏排行榜</title>
+        <link rel="stylesheet" type="text/css" href="css/common.css">
+        <link rel="stylesheet" type="text/css" href="css/ranking-list.css">
+        <script src="js/jquery-3.3.1.js"></script>
+        <script>
+        	var count=0;
+        	var flag=0;
+        	var nowpage=1;
+        	var page;
+        	$(function(){
+        		$.post("favorite/getCount",null,function(data){
+        			count=data;
+        			if(data>0){
+        				for(var i=1;i<=data;i++){
+        					if(i<=10){
+        						var newli="<li class=\"myli\"><a href=\"#\" onclick=\"changepage(this)\" >"+i+"</a></li>";	
+            					$("#next").before(newli);	
+            					if(i==1){
+            						$("#next").prev().css({"background": "red"});
+            					}
+        					}
+        					
+        				}
+        			}
+        		});
+        		
+//         		$("#head").click(function(){
+//         			changepage(0);
+//         		});
+        		$("#prev").click(function(){
+        				if($(page).html()!="1"){
+        					page=$(page).parent().prev().children();
+                			changepage(page);	
+            				
+        				}
+        				
+        			
+        		});
+        		$("#next").click(function(){
+        			if($(page).html()!=count){
+    					page=$(page).parent().next().children();
+            			changepage(page);	
+        				
+    				}
+        		});
+        		$("#last").click(function(){
+        			var b=$(this).parent().parent().find(".myli").eq(count-1).children();
+        			changepage(b)
+        		});
+        	});
+        	changepage(0);
+        	function changepage(b){
+        		var a=0;
+        		if(b==0){
+        			a=1;
+        			
+        		}
+        		else{
+        			page=b;
+        			a=$(b).html();
+        		}
+        		$.post("favorite/getList",{"num":a},function(data){
+					var len=0;
+					$("#newli").html("");
+        			for(i in data) {
+        				var newli=" <li>\
+                            <span class=\"num one\">"+((Number(i)+Number(1))+(a-1)*8)+"</span>\
+                            <a href=\"route_detail.html\"><img src=\""+data[i].rimage+"\" alt=\"\"></a>\
+                            <h4><a href=\"route_detail.html?rid="+data[i].rid+"\">"+data[i].rname+"</a></h4>\
+                            <p>\
+                                <b class=\"price\">&yen;<span>"+data[i].price+"</span>起</b>\
+                                <span class=\"shouchang\">已收藏"+data[i].count+"次</span>\
+                            </p>\
+                        	</li>";
+                        	$("#newli").append(newli);
+        			}
+        			if(b!=0){
+        				$(b).parent().parent().children().css({"background": "#FFFFFF"});
+            			$(b).parent().css({"background": "red"});	
+            			if(count>10){
+            				var index=Number($(b).html());
+            				if(index>=6){
+            					var c=0;
+            					if(count-index>4&&index>nowpage){
+            						c=index-6;
+            						for(var i=0;i<10;i++){
+                						var pagenum=$(b).parent().parent().find(".myli").eq(i).children().html();
+                						//if(Number(pagenum)+c<=count)		
+                						$(b).parent().parent().find(".myli").eq(i).children().html(Number(pagenum)+c);
+                					}
+            						$(b).parent().parent().children().css({"background": "#FFFFFF"});
+                					$(b).parent().parent().find(".myli").eq(5).css({"background": "red"});
+                					flag=0;
+            					}
+            					else if(count-index>4&&index<nowpage){
+            						c=index-nowpage;
+            						var pagenum1=$(b).parent().parent().find(".myli").eq(0).children().html();
+            						if(pagenum1+c>=0){
+            							for(var i=0;i<10;i++){
+                    						var pagenum=$(b).parent().parent().find(".myli").eq(i).children().html();
+                    						//if(Number(pagenum)+c<=count)
+                    						$(b).parent().parent().find(".myli").eq(i).children().html(Number(pagenum)+c);
+                    					}
+            							$(b).parent().parent().children().css({"background": "#FFFFFF"});
+                    					$(b).parent().parent().find(".myli").eq(5).css({"background": "red"});
+            						}else{
+            							var tt=$(b).html();
+            							for(var i=0;i<10;i++){
+                    						var pagenum=$(b).parent().parent().find(".myli").eq(i).children().html(Number(i)+1);	
+                    					}
+            							$(b).parent().parent().children().css({"background": "#FFFFFF"});
+                						$(b).parent().parent().find(".myli").eq(tt-1).css({"background": "red"});
+            						}
+            						
+            						
+                					flag=0;
+            					}
+            					else if(count-index<4){
+            						c=count-(index);
+            						if(flag==0){
+            							for(var i=0;i<10;i++){
+                    						var pagenum=$(b).parent().parent().find(".myli").eq(i).children().html();
+                    						//if(Number(pagenum)+c<=count)		
+                    						$(b).parent().parent().find(".myli").eq(i).children().html(Number(pagenum)+c);
+                    					}
+            							$(b).parent().parent().children().css({"background": "#FFFFFF"});
+                    					$(b).parent().parent().find(".myli").eq(9-(c)).css({"background": "red"});
+                    					flag=1;
+            						}
+            						else{
+            							$(b).parent().parent().children().css({"background": "#FFFFFF"});
+                						$(b).parent().css({"background": "red"});
+            						}
+            						
+            					}
+            					
+            					
+            				}else{
+            					var tt=$(b).html();
+            					for(var i=0;i<10;i++){
+            						var pagenum=$(b).parent().parent().find(".myli").eq(i).children().html(Number(i)+1);
+            						
+            					}
+        						$(b).parent().parent().children().css({"background": "#FFFFFF"});
+        						$(b).parent().parent().find(".myli").eq(tt-1).css({"background": "red"});
+            				}
+            			}
+        			}
+        			nowpage=a;
+        		});
+        	}
+        	
+        </script>
+    </head>
+    <body>
+    <!--引入头部-->
+    <div id="header"></div>
+        <div class="contant">
+            <div class="shaixuan">
+                <span>线路名称</span>
+                <input type="text">
+                <span>金额</span>
+                <input type="text">~<input type="text">
+                <button>搜索</button>
+            </div>
+            <div class="list clearfix" >
+                <ul id="newli">
+<!--                     <li> -->
+<!--                         <span class="num one">1</span> -->
+<!--                         <a href="route_detail.html"><img src="images/jiangxuan_1.jpg" alt=""></a> -->
+<!--                         <h4><a href="route_detail.html">【尾单特卖】全国-曼谷6-7天自由行 泰国出境旅游 特价往6-7天自由行 泰国出境旅游 特价往..</a></h4> -->
+<!--                         <p> -->
+<!--                             <b class="price">&yen;<span>899</span>起</b> -->
+<!--                             <span class="shouchang">已收藏450次</span> -->
+<!--                         </p> -->
+<!--                     </li> -->
+<!--                     <li> -->
+<!--                         <span class="num two">2</span> -->
+<!--                          <a href="route_detail.html"><img src="images/jiangxuan_2.jpg" alt=""></a> -->
+<!--                         <h4><a href="route_detail.html">【尾单特卖】全国-曼谷6-7天自由行 泰国出境旅游 特价往6-7天自由行 泰国出境旅游 特价往..</a></h4> -->
+<!--                         <p> -->
+<!--                             <b class="price">&yen;<span>899</span>起</b> -->
+<!--                             <span class="shouchang">已收藏450次</span> -->
+<!--                         </p> -->
+<!--                     </li> -->
+<!--                     <li> -->
+<!--                         <span class="num">3</span> -->
+<!--                          <a href="route_detail.html"><img src="images/jiangxuan_3.jpg" alt=""></a> -->
+<!--                         <h4><a href="route_detail.html">【尾单特卖】全国-曼谷6-7天自由行 泰国出境旅游 特价往6-7天自由行 泰国出境旅游 特价往..</a></h4> -->
+<!--                         <p> -->
+<!--                             <b class="price">&yen;<span>899</span>起</b> -->
+<!--                             <span class="shouchang">已收藏450次</span> -->
+<!--                         </p> -->
+<!--                     </li> -->
+<!--                     <li> -->
+<!--                         <span class="num">4</span> -->
+<!--                          <a href="route_detail.html"><img src="images/jiangxuan_4.jpg" alt=""></a> -->
+<!--                         <h4><a href="route_detail.html">【尾单特卖】全国-曼谷6-7天自由行 泰国出境旅游 特价往6-7天自由行 泰国出境旅游 特价往..</a></h4> -->
+<!--                         <p> -->
+<!--                             <b class="price">&yen;<span>899</span>起</b> -->
+<!--                             <span class="shouchang">已收藏450次</span> -->
+<!--                         </p> -->
+<!--                     </li> -->
+<!--                     <li> -->
+<!--                         <span class="num">5</span> -->
+<!--                          <a href="route_detail.html"><img src="images/jiangxuan_4.jpg" alt=""></a> -->
+<!--                         <h4><a href="route_detail.html">【尾单特卖】全国-曼谷6-7天自由行 泰国出境旅游 特价往6-7天自由行 泰国出境旅游 特价往..</a></h4> -->
+<!--                         <p> -->
+<!--                             <b class="price">&yen;<span>899</span>起</b> -->
+<!--                             <span class="shouchang">已收藏450次</span> -->
+<!--                         </p> -->
+<!--                     </li> -->
+<!--                     <li> -->
+<!--                         <span class="num">6</span> -->
+<!--                          <a href="route_detail.html"><img src="images/jiangxuan_4.jpg" alt=""></a> -->
+<!--                         <h4><a href="route_detail.html">【尾单特卖】全国-曼谷6-7天自由行 泰国出境旅游 特价往6-7天自由行 泰国出境旅游 特价往..</a></h4> -->
+<!--                         <p> -->
+<!--                             <b class="price">&yen;<span>899</span>起</b> -->
+<!--                             <span class="shouchang">已收藏450次</span> -->
+<!--                         </p> -->
+<!--                     </li> -->
+<!--                     <li> -->
+<!--                         <span class="num">7</span> -->
+<!--                          <a href="route_detail.html"><img src="images/jiangxuan_4.jpg" alt=""></a> -->
+<!--                         <h4><a href="route_detail.html">【尾单特卖】全国-曼谷6-7天自由行 泰国出境旅游 特价往6-7天自由行 泰国出境旅游 特价往..</a></h4> -->
+<!--                         <p> -->
+<!--                             <b class="price">&yen;<span>899</span>起</b> -->
+<!--                             <span class="shouchang">已收藏450次</span> -->
+<!--                         </p> -->
+<!--                     </li> -->
+<!--                     <li> -->
+<!--                         <span class="num">8</span> -->
+<!--                         <a href="route_detail.html"><img src="images/jiangxuan_4.jpg" alt=""></a> -->
+<!--                         <h4><a href="route_detail.html">【尾单特卖】全国-曼谷6-7天自由行 泰国出境旅游 特价往6-7天自由行 泰国出境旅游 特价往..</a></h4> -->
+<!--                         <p> -->
+<!--                             <b class="price">&yen;<span>899</span>起</b> -->
+<!--                             <span class="shouchang">已收藏450次</span> -->
+<!--                         </p> -->
+<!--                     </li> -->
+                </ul>
+            </div>
+            <div class="pageNum">
+                <ul>
+                    <li><a href="" id="head">首页</a></li>
+                    <li class="threeword" ><a href="javascript:;" id="prev">上一页</a></li>
+<!--                     <li><a href="#">1</a></li> -->
+<!--                     <li><a href="#">2</a></li> -->
+<!--                     <li><a href="#">3</a></li> -->
+<!--                     <li><a href="#">4</a></li> -->
+<!--                     <li><a href="#">5</a></li> -->
+<!--                     <li><a href="#">6</a></li> -->
+<!--                     <li><a href="#">7</a></li> -->
+<!--                     <li><a href="#">8</a></li> -->
+<!--                     <li><a href="#">9</a></li> -->
+<!--                     <li><a href="#">10</a></li> -->
+                    <li class="threeword" id="next" ><a href="javascript:;">下一页</a></li>
+                    <li class="threeword" id="last"><a href="javascript:;">末页</a></li>
+                </ul>
+            </div>
+        </div>
+    	
+         <!--导入底部-->
+   		 <div id="footer"></div>
+    <!--导入布局js，共享header和footer-->
+    <script type="text/javascript" src="js/include.js"></script>
+    </body>
+</html>
